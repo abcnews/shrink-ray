@@ -1,0 +1,67 @@
+{
+  "name": "@abcnews/shrink-ray",
+  "version": "1.0.0-pre.0",
+  "description": "Convert a video to optimised renditions in multiple aspect ratios, with the help of ffmpeg",
+  "license": "MIT",
+  "author": "Australian Broadcasting Corporation",
+  "contributors": [
+    "Colin Gourlay <Gourlay.Colin@abc.net.au>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abcnews/shrink-ray.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abcnews/shrink-ray/issues"
+  },
+  "bin": {
+    "shrink-ray": "./bin/index.js"
+  },
+  "main": "dist/index.js",
+  "module": "dist/shrink-ray.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "lint": "tsdx lint",
+    "prepublishOnly": "npm run build",
+    "release": "np"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.21",
+    "husky": "^3.0.9",
+    "np": "^5.1.3",
+    "tsdx": "^0.11.0",
+    "tslib": "^1.10.0",
+    "typescript": "^3.6.4"
+  },
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.0.20",
+    "@ffprobe-installer/ffprobe": "^1.0.12",
+    "carlo": "^0.9.46",
+    "count-files": "^2.6.2",
+    "cross-zip": "^2.1.6",
+    "execa": "^3.2.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "make-dir": "^3.0.0",
+    "sade": "^1.6.1",
+    "shortid": "^2.2.15",
+    "tempy": "^0.3.0",
+    "zip-a-folder": "0.0.9"
+  }
+}
