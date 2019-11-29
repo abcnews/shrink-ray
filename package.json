@@ -27,13 +27,13 @@
   "scripts": {
     "start": "tsdx watch",
     "build": "tsdx build",
-    "lint": "tsdx lint",
+    "lint": "tsdx lint src",
     "prepublishOnly": "npm run build",
     "release": "np"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "tsdx lint"
+      "pre-commit": "tsdx lint src"
     }
   },
   "prettier": {

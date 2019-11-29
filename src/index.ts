@@ -1,8 +1,8 @@
 import { basename, dirname, join } from 'path';
-const ffmpeg = require('fluent-ffmpeg');
-const { generate } = require('shortid');
 import tempy from 'tempy';
 import { zip } from 'zip-a-folder';
+const ffmpeg = require('fluent-ffmpeg');
+const { generate } = require('shortid');
 
 ffmpeg.setFfmpegPath(
   require('@ffmpeg-installer/ffmpeg').path.replace(
