@@ -1,6 +1,6 @@
 {
   "name": "@abcnews/shrink-ray",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Convert a video to optimised renditions in multiple aspect ratios, with the help of ffmpeg",
   "license": "MIT",
   "author": "Australian Broadcasting Corporation",
