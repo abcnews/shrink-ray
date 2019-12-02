@@ -49,14 +49,15 @@ interface ShrinkRayOptions {
 
 const SHARED_OPTIONS = [
   '-y',
-  '-movflags',
-  'faststart',
+  '-movflags faststart',
   '-profile:v high',
   '-level:v 4.1',
-  '-crf',
-  '23',
-  '-preset',
-  'veryslow',
+  '-b:v 2M',
+  '-maxrate 2M',
+  '-bufsize 3M',
+  '-vcodec libx264',
+  '-crf 23',
+  '-preset veryslow',
   '-an',
 ];
 
@@ -116,10 +117,7 @@ export default async function shrinkRay(
           }
         })
         .on('end', () => resolve())
-        .on('error', reject)
-        .videoBitrate('1024k')
-        .videoCodec('libx264')
-        .outputOptions(SHARED_OPTIONS);
+        .on('error', reject);
 
       Object.keys(ASPECT_RATIO_FILTERS).forEach(aspectRatio => {
         const outputFileBase = fileBase.replace(
@@ -129,6 +127,7 @@ export default async function shrinkRay(
 
         command = command
           .output(join(tempDir, outputFileBase))
+          .outputOptions(SHARED_OPTIONS)
           .videoFilters(ASPECT_RATIO_FILTERS[aspectRatio]);
       });
 
