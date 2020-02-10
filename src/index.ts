@@ -45,9 +45,10 @@ type Logger = (message: string) => void;
 interface ShrinkRayOptions {
   logger?: Logger | boolean;
   onProgress?: (progress: Progress) => void;
+  shouldRetainAudio?: boolean;
 }
 
-const SHARED_OPTIONS = [
+const SHARED_OUTPUT_OPTIONS = [
   '-y',
   '-movflags faststart',
   '-profile:v high',
@@ -58,13 +59,13 @@ const SHARED_OPTIONS = [
   '-vcodec libx264',
   '-crf 23',
   '-preset veryslow',
-  '-an',
 ];
 
 const FILE_EXTENSION_PATTERN = /\.\w+$/i;
 
 const ASPECT_RATIO_FILTERS: FiltersOfAspectRatios = {
-  '16x9': ['crop=in_w:in_w*min(in_w/in_h\\,in_h/in_w)'],
+  // '16x9': ['crop=in_w:in_w*min(in_w/in_h\\,in_h/in_w)'],
+  '16x9': ['crop=iw:iw/16*9'],
   '1x1': ['crop=min(in_h\\,in_w):min(in_h\\,in_w)'],
 };
 
@@ -86,10 +87,14 @@ export default async function shrinkRay(
   file: string,
   options?: ShrinkRayOptions
 ) {
-  let { logger, onProgress } = options || {};
+  let { logger, onProgress, shouldRetainAudio } = options || {};
 
   logger =
     logger === false ? noop : !logger || logger === true ? console.log : logger;
+
+  const outputOptions = SHARED_OUTPUT_OPTIONS.concat(
+    shouldRetainAudio ? [] : ['-an']
+  );
 
   try {
     await probe(file);
@@ -127,7 +132,7 @@ export default async function shrinkRay(
 
         command = command
           .output(join(tempDir, outputFileBase))
-          .outputOptions(SHARED_OPTIONS)
+          .outputOptions(outputOptions)
           .videoFilters(ASPECT_RATIO_FILTERS[aspectRatio]);
       });
 
