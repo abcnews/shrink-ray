@@ -62,6 +62,7 @@ const SHARED_OUTPUT_OPTIONS = [
 ];
 
 const FILE_EXTENSION_PATTERN = /\.\w+$/i;
+const ILLEGAL_FILENAME_CHARACTERS_PATTERN = /[^a-zA-Z\d_-]/g;
 
 const ASPECT_RATIO_FILTERS: FiltersOfAspectRatios = {
   // '16x9': ['crop=in_w:in_w*min(in_w/in_h\\,in_h/in_w)'],
@@ -109,7 +110,9 @@ export default async function shrinkRay(
   const fileBase = basename(file);
   const fileDir = dirname(file);
   const projectId = generate();
-  const projectName = fileBase.replace(FILE_EXTENSION_PATTERN, `_${projectId}`);
+  const projectName = fileBase
+    .replace(FILE_EXTENSION_PATTERN, `_${projectId}`)
+    .replace(ILLEGAL_FILENAME_CHARACTERS_PATTERN, '_');
   const tempDir = tempy.directory();
   const zipFilePath = join(fileDir, `${projectName}.zip`);
 
@@ -124,14 +127,9 @@ export default async function shrinkRay(
         .on('end', () => resolve())
         .on('error', reject);
 
-      Object.keys(ASPECT_RATIO_FILTERS).forEach(aspectRatio => {
-        const outputFileBase = fileBase.replace(
-          FILE_EXTENSION_PATTERN,
-          `_${[projectId, aspectRatio, 'mp4'].join('.')}`
-        );
-
+      Object.keys(ASPECT_RATIO_FILTERS).forEach((aspectRatio, index) => {
         command = command
-          .output(join(tempDir, outputFileBase))
+          .output(join(tempDir, `${projectName}-${index + 1}.mp4`))
           .outputOptions(outputOptions)
           .videoFilters(ASPECT_RATIO_FILTERS[aspectRatio]);
       });
