@@ -18,8 +18,13 @@ ffmpeg.setFfprobePath(
   )
 );
 
-interface FiltersOfAspectRatios {
-  [key: string]: any[];
+type OutputOptions = string[];
+
+type VideoFilters = string[];
+
+interface AspectRatioConfig {
+  outputOptions: OutputOptions;
+  videoFilters: VideoFilters;
 }
 
 interface Stream {
@@ -48,26 +53,29 @@ interface ShrinkRayOptions {
   shouldRetainAudio?: boolean;
 }
 
-const SHARED_OUTPUT_OPTIONS = [
+const FILE_EXTENSION_PATTERN = /\.\w+$/i;
+const ILLEGAL_FILENAME_CHARACTERS_PATTERN = /[^a-zA-Z\d_-]/g;
+
+const COMMON_OUTPUT_OPTIONS: OutputOptions = [
   '-y',
   '-movflags faststart',
   '-profile:v high',
   '-level:v 4.1',
-  '-b:v 2M',
-  '-maxrate 2M',
   '-bufsize 3M',
   '-vcodec libx264',
   '-crf 23',
   '-preset veryslow',
 ];
 
-const FILE_EXTENSION_PATTERN = /\.\w+$/i;
-const ILLEGAL_FILENAME_CHARACTERS_PATTERN = /[^a-zA-Z\d_-]/g;
-
-const ASPECT_RATIO_FILTERS: FiltersOfAspectRatios = {
-  // '16x9': ['crop=in_w:in_w*min(in_w/in_h\\,in_h/in_w)'],
-  '16x9': ['crop=iw:iw/16*9'],
-  '1x1': ['crop=min(in_h\\,in_w):min(in_h\\,in_w)'],
+const ASPECT_RATIO_CONFIGS: { [key: string]: AspectRatioConfig } = {
+  '16x9': {
+    outputOptions: ['-b:v 1900k', '-maxrate 1900k'],
+    videoFilters: ['crop=iw:iw/16*9'],
+  },
+  '1x1': {
+    outputOptions: ['-b:v 1M', '-maxrate 1M'],
+    videoFilters: ['crop=min(in_h\\,in_w):min(in_h\\,in_w)'],
+  },
 };
 
 function probe(file: string) {
@@ -93,14 +101,13 @@ export default async function shrinkRay(
   logger =
     logger === false ? noop : !logger || logger === true ? console.log : logger;
 
-  const outputOptions = SHARED_OUTPUT_OPTIONS.concat(
+  const commonOutputOptions = COMMON_OUTPUT_OPTIONS.concat(
     shouldRetainAudio ? [] : ['-an']
   );
 
   try {
     await probe(file);
   } catch (e) {
-    console.log(e);
     const msg = e.stderr || JSON.parse(e.stdout).error.string;
 
     console.error(new Error(msg));
@@ -127,11 +134,15 @@ export default async function shrinkRay(
         .on('end', () => resolve())
         .on('error', reject);
 
-      Object.keys(ASPECT_RATIO_FILTERS).forEach((aspectRatio, index) => {
+      Object.keys(ASPECT_RATIO_CONFIGS).forEach((aspectRatio, index) => {
+        const { outputOptions, videoFilters } = ASPECT_RATIO_CONFIGS[
+          aspectRatio
+        ];
+
         command = command
           .output(join(tempDir, `${projectName}-${index + 1}.mp4`))
-          .outputOptions(outputOptions)
-          .videoFilters(ASPECT_RATIO_FILTERS[aspectRatio]);
+          .outputOptions(commonOutputOptions.concat(outputOptions))
+          .videoFilters(videoFilters);
       });
 
       command.run();
